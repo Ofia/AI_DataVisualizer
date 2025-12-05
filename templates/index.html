@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Data Visualizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+    <!-- Burger Menu -->
+    <div class="burger-menu" id="burgerMenu">
+        <div class="burger-icon" id="burgerIcon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="closeSidebar">&times;</button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="menu-section">
+                    <h3>LLM API Provider</h3>
+                    <div class="provider-list">
+                        {% for key, value in ai_providers.items() %}
+                        <div class="provider-item {{ 'disabled' if not value.enabled else '' }}" 
+                             data-provider="{{ key }}"
+                             {{ 'onclick="selectProvider(\'' + key + '\')"' if value.enabled else '' }}>
+                            <div class="provider-info">
+                                <span class="provider-name">{{ value.name }}</span>
+                                {% if not value.enabled %}
+                                <span class="coming-soon">Coming Soon</span>
+                                {% endif %}
+                            </div>
+                            <div class="provider-status">
+                                {% if value.enabled %}
+                                <span class="status-dot active"></span>
+                                {% else %}
+                                <span class="status-dot"></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <header>
+            <h1>🎨 AI Data Visualizer</h1>
+            <p class="subtitle">Transform your data into beautiful visualizations</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-content">
+                    <div class="upload-icon">📊</div>
+                    <h3>Drag & Drop Your File</h3>
+                    <p>or click to browse</p>
+                    <p class="file-types">Supported: PDF, Excel (.xlsx, .xls), Screenshots (.png, .jpg)</p>
+                </div>
+                <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg" hidden>
+            </div>
+            
+            <div class="upload-status" id="uploadStatus" style="display: none;">
+                <div class="status-content">
+                    <span class="status-icon">✓</span>
+                    <span class="status-text" id="statusText">File uploaded successfully!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template Selector -->
+        <div class="template-section" id="templateSection" style="display: none;">
+            <h2>Choose Visualization Style</h2>
+            <div class="template-grid">
+                {% for template in templates %}
+                <div class="template-card {{ 'active' if template == 'professional' else '' }}" 
+                     data-template="{{ template }}"
+                     onclick="selectTemplate('{{ template }}')">
+                    <div class="template-preview">
+                        <div class="template-icon">
+                            {% if template == 'professional' %}📈
+                            {% elif template == 'vibrant' %}🌈
+                            {% elif template == 'minimal' %}⚪
+                            {% elif template == 'dark' %}🌙
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>{{ template.title() }}</h3>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeData()">
+                <span class="btn-text">Generate Visualizations</span>
+                <span class="btn-loader" style="display: none;">⏳ Analyzing...</span>
+            </button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loader"></div>
+            <p>AI is analyzing your data...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2>Visualization Results</h2>
+                <button class="export-btn" onclick="exportPDF()">📄 Export to PDF</button>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-card" id="summaryCard">
+                <h3>Summary</h3>
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="insights-card" id="insightsCard">
+                <h3>Key Insights</h3>
+                <ul id="insightsList"></ul>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-container" id="chartsContainer"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ Transform your data into beautiful, AI-generated visualizations using advanced l
 - 🤖 **AI-Powered Analysis**: Leverages Claude (Anthropic) to intelligently analyze your data
 - 🎨 **4 Beautiful Templates**: Choose from Professional, Vibrant, Minimal, or Dark Mode themes
 - 🔄 **Live Template Switching**: Toggle between visualization styles in real-time
-- 📄 **PDF Export**: Download complete reports with all visualizations (coming soon)
+- 📄 **PDF Export**: Download professional, high-quality reports with data-driven charts
 - 🌐 **Modern Web Interface**: Drag-and-drop file upload with smooth animations
 
 ## Supported AI Providers
@@ -138,6 +138,15 @@ Each template includes:
 - Chart aesthetics
 - Background and grid colors
 
+### PDF Export (New)
+- **Data-Driven Generation**: Builds PDFs programmatically for perfect layout.
+- **High-Quality Charts**: Renders Plotly charts as crisp images.
+- **Smart Layout**: Automatically handles page breaks and margins.
+
+### Direct Plotly JSON (New)
+- **Advanced Charts**: Supports complex visualizations (Bubble, Sunburst, etc.).
+- **Creative Freedom**: AI generates full Plotly specifications directly.
+
 ## Troubleshooting
 
 ### OCR Issues
@@ -153,7 +162,7 @@ To install tesseract:
 
 ## Future Enhancements
 
-- [ ] PDF export functionality
+- [x] PDF export functionality
 - [ ] OpenAI GPT-4 Vision integration
 - [ ] Google Gemini integration
 - [ ] Local Llama model support

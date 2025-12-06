@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Data Visualizer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
     <!-- Burger Menu -->
     <div class="burger-menu" id="burgerMenu">
@@ -15,21 +19,21 @@
             <span></span>
             <span></span>
         </div>
-        
+
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>Settings</h2>
                 <button class="close-btn" id="closeSidebar">&times;</button>
             </div>
-            
+
             <div class="sidebar-content">
                 <div class="menu-section">
                     <h3>LLM API Provider</h3>
                     <div class="provider-list">
                         {% for key, value in ai_providers.items() %}
-                        <div class="provider-item {{ 'disabled' if not value.enabled else '' }}" 
-                             data-provider="{{ key }}"
-                             {{ 'onclick="selectProvider(\'' + key + '\')"' if value.enabled else '' }}>
+                        <div class="provider-item {{ 'disabled' if not value.enabled else '' }}"
+                            data-provider="{{ key }}" {{ 'onclick="selectProvider(\'' + key + ' \')"' if value.enabled
+                            else '' }}>
                             <div class="provider-info">
                                 <span class="provider-name">{{ value.name }}</span>
                                 {% if not value.enabled %}
@@ -69,7 +73,7 @@
                 </div>
                 <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg" hidden>
             </div>
-            
+
             <div class="upload-status" id="uploadStatus" style="display: none;">
                 <div class="status-content">
                     <span class="status-icon">✓</span>
@@ -83,9 +87,8 @@
             <h2>Choose Visualization Style</h2>
             <div class="template-grid">
                 {% for template in templates %}
-                <div class="template-card {{ 'active' if template == 'professional' else '' }}" 
-                     data-template="{{ template }}"
-                     onclick="selectTemplate('{{ template }}')">
+                <div class="template-card {{ 'active' if template == 'professional' else '' }}"
+                    data-template="{{ template }}" onclick="selectTemplate('{{ template }}')">
                     <div class="template-preview">
                         <div class="template-icon">
                             {% if template == 'professional' %}📈
@@ -139,4 +142,5 @@
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
+
 </html>

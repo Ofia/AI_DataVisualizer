@@ -284,30 +284,151 @@ function displayResults(data) {
     });
 }
 
-// Export to PDF
+// Export to PDF (Data-Driven)
 async function exportPDF() {
+    const exportBtn = document.querySelector('.export-btn');
+    const originalText = exportBtn.textContent;
+
     try {
-        const response = await fetch('/export-pdf', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                filepath: currentFilepath,
-                template: currentTemplate,
-                analysis: currentAnalysis
-            })
-        });
+        exportBtn.textContent = 'Generating PDF...';
+        exportBtn.disabled = true;
 
-        const data = await response.json();
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
 
-        if (data.success) {
-            alert('PDF export feature coming soon!');
-        } else {
-            alert(`Error: ${data.error}`);
+        // PDF Settings
+        const margin = 15;
+        const pageWidth = doc.internal.pageSize.getWidth(); // 210mm
+        const pageHeight = doc.internal.pageSize.getHeight(); // 297mm
+        const contentWidth = pageWidth - (margin * 2);
+        let yPos = margin;
+
+        // Helper to add new page if needed
+        function checkPageBreak(heightNeeded) {
+            if (yPos + heightNeeded > pageHeight - margin) {
+                doc.addPage();
+                yPos = margin;
+                return true;
+            }
+            return false;
         }
+
+        // --- 1. Header ---
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(44, 62, 80); // #2C3E50
+        doc.text("AI Data Analysis Report", margin, yPos + 8);
+        yPos += 15;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on ${new Date().toLocaleString()}`, margin, yPos);
+        yPos += 10;
+
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 10;
+
+        // --- 2. Summary ---
+        const summaryText = document.getElementById('summaryText').textContent;
+        if (summaryText) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Executive Summary", margin, yPos);
+            yPos += 8;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+
+            const splitSummary = doc.splitTextToSize(summaryText, contentWidth);
+            doc.text(splitSummary, margin, yPos);
+            yPos += (splitSummary.length * 6) + 10;
+        }
+
+        // --- 3. Insights ---
+        const insightsList = document.querySelectorAll('#insightsList li');
+        if (insightsList.length > 0) {
+            checkPageBreak(30); // Ensure header fits
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Key Insights", margin, yPos);
+            yPos += 8;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+
+            insightsList.forEach(li => {
+                const text = "• " + li.textContent;
+                const splitText = doc.splitTextToSize(text, contentWidth);
+
+                checkPageBreak(splitText.length * 6);
+                doc.text(splitText, margin, yPos);
+                yPos += (splitText.length * 6) + 2;
+            });
+            yPos += 10;
+        }
+
+        // --- 4. Charts ---
+        const chartItems = document.querySelectorAll('.chart-item');
+
+        for (let i = 0; i < chartItems.length; i++) {
+            const item = chartItems[i];
+            const chartDiv = item.querySelector('.plotly-graph-div'); // Plotly creates this class
+            const descDiv = item.querySelector('.chart-description');
+
+            if (chartDiv) {
+                // Get chart image using Plotly's native export
+                // This is much better than html2canvas as it handles SVG correctly
+                const imgData = await Plotly.toImage(chartDiv, {
+                    format: 'png',
+                    width: 1000, // High res
+                    height: 600
+                });
+
+                // Calculate dimensions to fit PDF width
+                const imgHeight = (600 / 1000) * contentWidth;
+
+                // Check space for chart + description
+                // If not enough space, start new page
+                checkPageBreak(imgHeight + 40);
+
+                // Add Chart
+                doc.addImage(imgData, 'PNG', margin, yPos, contentWidth, imgHeight);
+                yPos += imgHeight + 5;
+
+                // Add Description
+                if (descDiv) {
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(10);
+                    doc.setTextColor(80, 80, 80);
+
+                    const splitDesc = doc.splitTextToSize(descDiv.textContent, contentWidth);
+                    checkPageBreak(splitDesc.length * 5);
+
+                    doc.text(splitDesc, margin, yPos);
+                    yPos += (splitDesc.length * 5) + 15;
+                } else {
+                    yPos += 15;
+                }
+            }
+        }
+
+        // Save
+        doc.save('AI_Data_Analysis_Report.pdf');
+
     } catch (error) {
-        alert(`Error: ${error.message}`);
+        console.error("PDF Export Error:", error);
+        alert("Error generating PDF: " + error.message);
+    } finally {
+        exportBtn.textContent = originalText;
+        exportBtn.disabled = false;
     }
 }
 

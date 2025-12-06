@@ -29,7 +29,7 @@ class TemplateManager:
             'key_metrics': analysis.get('key_metrics', {})
         }
         
-        # Get data
+        # Get data (kept for reference, though AI now handles data transformation)
         if 'dataframe' in extracted_data:
             data = extracted_data['dataframe']
         elif 'tables' in extracted_data and len(extracted_data['tables']) > 0:
@@ -39,100 +39,29 @@ class TemplateManager:
         else:
             data = []
         
-        
         # Generate charts based on AI recommendations
-        recommendations = analysis.get('chart_recommendations', [])
+        # New format: 'charts' list with full Plotly specs
+        recommendations = analysis.get('charts', [])
         
-        # Get dataframe for column validation
-        try:
-            df = pd.DataFrame(data)
-            available_columns = df.columns.tolist()
-        except:
-            available_columns = []
+        # Fallback for backward compatibility with old prompt format
+        if not recommendations and 'chart_recommendations' in analysis:
+            print("Warning: Received old format from AI, using fallback")
+            recommendations = analysis.get('chart_recommendations', [])
         
-        for rec in recommendations[:4]:  # Maximum 4 charts
-            chart_type = rec.get('type', 'bar')
-            title = rec.get('title', 'Data Visualization')
-            description = rec.get('description', '')
-            x_column = rec.get('x_column', '')
-            y_column = rec.get('y_column', '')
-            
-            # Validate columns exist in data
-            if not x_column or not y_column:
-                print(f"Skipping chart '{title}': missing column specification")
-                continue
-            
-            # Check if x_column exists
-            if x_column not in available_columns:
-                print(f"Skipping chart '{title}': x_column '{x_column}' not found in data. Available: {available_columns}")
-                continue
-            
-            # Check if y_column(s) exist
-            if ',' in y_column:
-                # Multiple columns
-                y_columns = [col.strip() for col in y_column.split(',')]
-                missing_cols = [col for col in y_columns if col not in available_columns]
-                if missing_cols:
-                    print(f"Skipping chart '{title}': y_columns {missing_cols} not found in data. Available: {available_columns}")
-                    continue
-            else:
-                # Single column
-                if y_column not in available_columns:
-                    print(f"Skipping chart '{title}': y_column '{y_column}' not found in data. Available: {available_columns}")
-                    continue
-            
+        for rec in recommendations:
             try:
-                if chart_type == 'bar':
-                    chart = self.chart_generator.create_bar_chart(
-                        data,
-                        x_column,
-                        y_column,
-                        title,
-                        description
-                    )
+                # Check if this is a full Plotly JSON spec (new format)
+                if 'figure' in rec:
+                    chart = self.chart_generator.create_chart_from_json(rec)
                     visualizations['charts'].append(chart)
-                
-                elif chart_type == 'line':
-                    chart = self.chart_generator.create_line_chart(
-                        data,
-                        x_column,
-                        y_column,
-                        title,
-                        description
-                    )
-                    visualizations['charts'].append(chart)
-                
-                elif chart_type == 'pie' and rec.get('x_column') and rec.get('y_column'):
-                    chart = self.chart_generator.create_pie_chart(
-                        data,
-                        rec['x_column'],
-                        rec['y_column'],
-                        title,
-                        description
-                    )
-                    visualizations['charts'].append(chart)
-                
-                elif chart_type == 'scatter' and rec.get('x_column') and rec.get('y_column'):
-                    chart = self.chart_generator.create_scatter_chart(
-                        data,
-                        rec['x_column'],
-                        rec['y_column'],
-                        title,
-                        description
-                    )
-                    visualizations['charts'].append(chart)
-                
-                elif chart_type == 'heatmap':
-                    chart = self.chart_generator.create_heatmap(
-                        data,
-                        title,
-                        description
-                    )
-                    visualizations['charts'].append(chart)
+                else:
+                    # Fallback or error for unrecognized format
+                    print(f"Skipping chart '{rec.get('title', 'Unknown')}': missing figure specification")
+                    continue
             
             except Exception as e:
                 # Skip charts that fail to generate
-                print(f"Failed to generate {chart_type} chart: {str(e)}")
+                print(f"Failed to generate chart: {str(e)}")
                 continue
         
         # If no charts were generated, create a default one

@@ -1,0 +1,214 @@
+import React, { useState } from 'react';
+import { BarChart, Bar, PieChart, Pie, Cell, ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const CompensationDashboard = () => {
+  const [activeChart, setActiveChart] = useState('bar');
+
+  const data = [
+    { scenario: '2024\n(1239 wigs)', year: 2024, wigs: 1239, cuts: 859, grossProfit: 828476, chaniTotal: 545013, aviTotal: 283463, chaniPct: 65.79, aviPct: 34.21 },
+    { scenario: '2025\n(584 wigs)', year: 2025, wigs: 584, cuts: 468, grossProfit: 423074, chaniTotal: 254337, aviTotal: 168737, chaniPct: 60.12, aviPct: 39.88 },
+    { scenario: '2026\n(1000w/468c)', year: 2026, wigs: 1000, cuts: 468, grossProfit: 724442, chaniTotal: 405021, aviTotal: 319421, chaniPct: 55.91, aviPct: 44.09 },
+    { scenario: '2026\n(1200w/468c)', year: 2026, wigs: 1200, cuts: 468, grossProfit: 869330, chaniTotal: 477465, aviTotal: 391865, chaniPct: 54.92, aviPct: 45.08 },
+    { scenario: '2026\n(1200w/380c)', year: 2026, wigs: 1200, cuts: 380, grossProfit: 869330, chaniTotal: 457665, aviTotal: 411665, chaniPct: 52.65, aviPct: 47.35 },
+    { scenario: '2026\n(1200w/600c)', year: 2026, wigs: 1200, cuts: 600, grossProfit: 869330, chaniTotal: 507165, aviTotal: 362165, chaniPct: 58.34, aviPct: 41.66 }
+  ];
+
+  const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+  const CHANI_COLOR = '#8b5cf6';
+  const AVI_COLOR = '#ec4899';
+
+  const pieData = data.map((d, i) => ({
+    name: d.scenario,
+    value: d.grossProfit,
+    color: COLORS[i]
+  }));
+
+  const splitData = data.flatMap(d => [
+    { scenario: d.scenario, partner: 'Chani', amount: d.chaniTotal, percentage: d.chaniPct },
+    { scenario: d.scenario, partner: 'Avi', amount: d.aviTotal, percentage: d.aviPct }
+  ]);
+
+  const bubbleData = data.map((d, i) => ({
+    x: d.wigs,
+    y: d.cuts,
+    z: d.grossProfit / 10000,
+    name: d.scenario,
+    color: COLORS[i]
+  }));
+
+  const comparisonData = data.map(d => ({
+    scenario: d.scenario,
+    Chani: d.chaniTotal,
+    Avi: d.aviTotal
+  }));
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Partner Compensation Analytics
+        </h1>
+        <p className="text-center text-gray-600 mb-8">Interactive visualization of all scenarios</p>
+        
+        {/* Chart Navigation */}
+        <div className="flex justify-center gap-3 mb-8 flex-wrap">
+          {[
+            { id: 'bar', label: '📊 Comparison', icon: '📊' },
+            { id: 'pie', label: '🥧 Profit Split', icon: '🥧' },
+            { id: 'bubble', label: '⚫ Bubble Chart', icon: '⚫' },
+            { id: 'split', label: '💰 Partner Split', icon: '💰' },
+            { id: 'trend', label: '📈 Percentage Trend', icon: '📈' }
+          ].map(btn => (
+            <button
+              key={btn.id}
+              onClick={() => setActiveChart(btn.id)}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
+                activeChart === btn.id
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 shadow'
+              }`}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Charts */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
+          {activeChart === 'bar' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Total Compensation Comparison</h2>
+              <ResponsiveContainer width="100%" height={500}>
+                <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="scenario" angle={-45} textAnchor="end" height={100} />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="Chani" fill={CHANI_COLOR} radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="Avi" fill={AVI_COLOR} radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {activeChart === 'pie' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Gross Profit Distribution by Scenario</h2>
+              <ResponsiveContainer width="100%" height={500}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={true}
+                    label={({ name, value }) => `${name}: $${(value / 1000).toFixed(0)}k`}
+                    outerRadius={150}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {activeChart === 'bubble' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Wigs vs Cuts Bubble Chart</h2>
+              <p className="text-center text-gray-600 mb-4">Bubble size = Gross Profit</p>
+              <ResponsiveContainer width="100%" height={500}>
+                <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" dataKey="x" name="Wigs" label={{ value: 'Number of Wigs', position: 'bottom' }} />
+                  <YAxis type="number" dataKey="y" name="Cuts" label={{ value: 'Number of Cuts', angle: -90, position: 'left' }} />
+                  <Tooltip 
+                    cursor={{ strokeDasharray: '3 3' }}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-4 rounded-lg shadow-lg border-2 border-purple-200">
+                            <p className="font-bold text-purple-600">{data.name}</p>
+                            <p className="text-sm">Wigs: {data.x}</p>
+                            <p className="text-sm">Cuts: {data.y}</p>
+                            <p className="text-sm font-semibold">Profit: ${(data.z * 10000).toLocaleString()}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Scatter name="Scenarios" data={bubbleData} fill="#8b5cf6">
+                    {bubbleData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {activeChart === 'split' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Partner Income Split ($)</h2>
+              <ResponsiveContainer width="100%" height={500}>
+                <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="scenario" angle={-45} textAnchor="end" height={100} />
+                  <YAxis tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="Chani" stackId="a" fill={CHANI_COLOR} radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="Avi" stackId="a" fill={AVI_COLOR} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {activeChart === 'trend' && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Compensation Percentage Trend</h2>
+              <ResponsiveContainer width="100%" height={500}>
+                <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 100 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="scenario" angle={-45} textAnchor="end" height={100} />
+                  <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                  <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="chaniPct" stroke={CHANI_COLOR} strokeWidth={3} name="Chani %" dot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="aviPct" stroke={AVI_COLOR} strokeWidth={3} name="Avi %" dot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+            <h3 className="text-lg font-semibold mb-2">Highest Gross Profit</h3>
+            <p className="text-3xl font-bold">${data[3].grossProfit.toLocaleString()}</p>
+            <p className="text-sm opacity-90 mt-1">1200 wigs scenario</p>
+          </div>
+          <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl p-6 text-white shadow-lg">
+            <h3 className="text-lg font-semibold mb-2">Most Balanced Split</h3>
+            <p className="text-3xl font-bold">{data[4].chaniPct.toFixed(1)}% / {data[4].aviPct.toFixed(1)}%</p>
+            <p className="text-sm opacity-90 mt-1">1200w/380c scenario</p>
+          </div>
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <h3 className="text-lg font-semibold mb-2">Volume Range</h3>
+            <p className="text-3xl font-bold">584 - 1,239</p>
+            <p className="text-sm opacity-90 mt-1">Wigs per year</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CompensationDashboard;

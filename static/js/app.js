@@ -432,7 +432,38 @@ async function exportPDF() {
     }
 }
 
-// Initialize - select default provider
+// Initialize - select default provider and theme
 document.addEventListener('DOMContentLoaded', () => {
     selectProvider('anthropic');
+
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    // Check for saved theme or default to 00s (checked)
+    const savedTheme = localStorage.getItem('theme') || 'theme-00s';
+
+    if (savedTheme === 'theme-00s') {
+        body.classList.add('theme-00s');
+        body.classList.remove('theme-90s');
+        themeToggle.checked = true;
+    } else {
+        body.classList.add('theme-90s');
+        body.classList.remove('theme-00s');
+        themeToggle.checked = false;
+    }
+
+    themeToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            // 00s Mode
+            body.classList.add('theme-00s');
+            body.classList.remove('theme-90s');
+            localStorage.setItem('theme', 'theme-00s');
+        } else {
+            // 90s Mode
+            body.classList.add('theme-90s');
+            body.classList.remove('theme-00s');
+            localStorage.setItem('theme', 'theme-90s');
+        }
+    });
 });

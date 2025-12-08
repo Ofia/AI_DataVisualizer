@@ -1,5 +1,6 @@
 import anthropic
 from .base_provider import BaseProvider
+from visualization.templates import get_template_config
 from config import config
 import json
 import base64
@@ -9,14 +10,14 @@ class AnthropicProvider(BaseProvider):
         self.client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
         self.model = "claude-sonnet-4-5"
     
-    def analyze_data(self, extracted_data):
+    def analyze_data(self, extracted_data, template_name='professional'):
         """Analyze data using Claude"""
         try:
             # Prepare the data for Claude
             data_summary = self._prepare_data_summary(extracted_data)
             
             # Create the prompt
-            prompt = self._create_analysis_prompt(data_summary, extracted_data)
+            prompt = self._create_analysis_prompt(data_summary, extracted_data, template_name)
             
             # Check if there's an image
             messages = []
@@ -54,8 +55,12 @@ class AnthropicProvider(BaseProvider):
         }
         return summary
     
-    def _create_analysis_prompt(self, data_summary, extracted_data):
+    def _create_analysis_prompt(self, data_summary, extracted_data, template_name):
         """Create a comprehensive prompt for data analysis"""
+        template_config = get_template_config(template_name)
+        colors = template_config.get('colors', [])
+        color_instruction = f"Use this specific color palette for the charts: {', '.join(colors)}" if colors else "Use a professional color palette."
+
         prompt = f"""You are a creative data visualization expert specializing in Plotly. Your task is to analyze data and generate FULL Plotly figure specifications (data and layout) for visually stunning charts.
 
 Data Summary:
@@ -85,7 +90,7 @@ CHART TYPES TO CONSIDER:
 IMPORTANT GUIDELINES:
 - **Creativity**: Don't just stick to bar charts. Use Bubble charts for 3 variables, Sunbursts for hierarchy, etc.
 - **Data Transformation**: If the raw data needs processing (e.g., summing values by category), YOU must do it and put the calculated values in the chart data.
-- **Styling**: Make them look professional and modern. Use a nice color palette.
+- **Styling**: Make them look professional and modern. {color_instruction}
 - **Interactivity**: Enable tooltips and hover effects.
 
 RESPONSE FORMAT (JSON ONLY):

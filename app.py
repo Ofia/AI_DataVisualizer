@@ -72,7 +72,7 @@ def analyze_data():
         provider = ProviderFactory.get_provider(provider_name)
         
         # Analyze data with AI
-        analysis = provider.analyze_data(extracted_data)
+        analysis = provider.analyze_data(extracted_data, template_name)
         
         # Generate visualizations
         template_manager = TemplateManager(template_name)

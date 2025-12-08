@@ -4,7 +4,7 @@ class BaseProvider(ABC):
     """Abstract base class for AI providers"""
     
     @abstractmethod
-    def analyze_data(self, extracted_data):
+    def analyze_data(self, extracted_data, template_name='professional'):
         """
         Analyze the extracted data and return insights, visualization recommendations
         

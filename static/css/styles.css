@@ -445,7 +445,39 @@ input:checked+.slider:before {
 }
 
 .template-icon {
-    font-size: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.template-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.template-card:hover .template-icon-circle {
+    transform: scale(1.1);
+}
+
+.template-icon-circle.professional {
+    background: linear-gradient(135deg, #4A90E2, #d5e0d9);
+}
+
+.template-icon-circle.vibrant {
+    background: linear-gradient(135deg, #FF6B6B, #f1f0e9);
+}
+
+.template-icon-circle.minimal {
+    background: linear-gradient(135deg, #fdfbfb, #acb0b3);
+    border: 1px solid #e0e0e0;
+}
+
+.template-icon-circle.dark {
+    background: linear-gradient(135deg, #090a0a, #4e4e4e);
 }
 
 .template-info h3 {

@@ -12,48 +12,6 @@
 </head>
 
 <body>
-    <!-- Burger Menu -->
-    <div class="burger-menu" id="burgerMenu">
-        <div class="burger-icon" id="burgerIcon">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <button class="close-btn" id="closeSidebar">&times;</button>
-            </div>
-
-            <div class="sidebar-content">
-                <div class="menu-section">
-                    <h3>LLM API Provider</h3>
-                    <div class="provider-list">
-                        {% for key, value in ai_providers.items() %}
-                        <div class="provider-item {{ 'disabled' if not value.enabled else '' }}"
-                            data-provider="{{ key }}" {{ 'onclick="selectProvider(\'' + key + ' \')"' if value.enabled
-                            else '' }}>
-                            <div class="provider-info">
-                                <span class="provider-name">{{ value.name }}</span>
-                                {% if not value.enabled %}
-                                <span class="coming-soon">Coming Soon</span>
-                                {% endif %}
-                            </div>
-                            <div class="provider-status">
-                                {% if value.enabled %}
-                                <span class="status-dot active"></span>
-                                {% else %}
-                                <span class="status-dot"></span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="container">
         <header>

@@ -10,8 +10,8 @@ class Config:
     GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
     OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
     
-    # Default AI Provider
-    DEFAULT_AI_PROVIDER = os.getenv('DEFAULT_AI_PROVIDER', 'anthropic')
+    # Default AI Provider (hard-coded to free Hugging Face model)
+    DEFAULT_AI_PROVIDER = os.getenv('DEFAULT_AI_PROVIDER', 'huggingface')
     
     # File Upload Settings
     UPLOAD_FOLDER = 'uploads'

@@ -2,13 +2,10 @@
 let currentFile = null;
 let currentFilepath = null;
 let currentTemplate = 'professional';
-let currentProvider = 'anthropic';
+let currentProvider = 'huggingface'; // Hard-coded to use free Hugging Face model
 let currentAnalysis = null;
 
 // DOM elements
-const burgerIcon = document.getElementById('burgerIcon');
-const sidebar = document.getElementById('sidebar');
-const closeSidebar = document.getElementById('closeSidebar');
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const uploadStatus = document.getElementById('uploadStatus');
@@ -16,42 +13,6 @@ const statusText = document.getElementById('statusText');
 const templateSection = document.getElementById('templateSection');
 const loadingSection = document.getElementById('loadingSection');
 const resultsSection = document.getElementById('resultsSection');
-
-// Burger menu toggle
-burgerIcon.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    burgerIcon.classList.toggle('active');
-});
-
-closeSidebar.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    burgerIcon.classList.remove('active');
-});
-
-// Click outside sidebar to close
-document.addEventListener('click', (e) => {
-    if (!sidebar.contains(e.target) && !burgerIcon.contains(e.target)) {
-        sidebar.classList.remove('open');
-        burgerIcon.classList.remove('active');
-    }
-});
-
-// Select AI provider
-function selectProvider(provider) {
-    currentProvider = provider;
-
-    // Update UI
-    document.querySelectorAll('.provider-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-
-    const selectedItem = document.querySelector(`[data-provider="${provider}"]`);
-    if (selectedItem) {
-        selectedItem.classList.add('selected');
-    }
-
-    console.log('Selected provider:', provider);
-}
 
 // Drag and drop functionality
 dropZone.addEventListener('click', () => {
@@ -554,9 +515,8 @@ async function exportPDF() {
     }
 }
 
-// Initialize - select default provider and theme
+// Initialize theme
 document.addEventListener('DOMContentLoaded', () => {
-    selectProvider('anthropic');
 
     // Theme Toggle Logic
     const themeToggle = document.getElementById('themeToggle');

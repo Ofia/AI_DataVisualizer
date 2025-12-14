@@ -13,14 +13,14 @@ class HuggingFaceProvider(BaseProvider):
 
     def __init__(self):
         self.api_key = os.getenv('HUGGINGFACE_API_KEY', '')
-        # Free model options (you can change this)
-        self.model = "mistralai/Mistral-7B-Instruct-v0.2"  # Free & fast
-        # Alternative models:
-        # - "meta-llama/Llama-2-7b-chat-hf" (requires approval)
-        # - "HuggingFaceH4/zephyr-7b-beta" (good alternative)
-        # - "mistralai/Mixtral-8x7B-Instruct-v0.1" (powerful but slower)
+        # Free model that works with Inference API
+        self.model = "HuggingFaceH4/zephyr-7b-beta"  # Free, reliable model
+        # Alternative models if this one doesn't work:
+        # - "mistralai/Mistral-7B-Instruct-v0.1"
+        # - "meta-llama/Llama-2-7b-chat-hf" (may require approval)
+        # - "google/flan-t5-xxl" (text generation)
 
-        self.api_url = f"https://router.huggingface.co/models/{self.model}"
+        self.api_url = f"https://api-inference.huggingface.co/models/{self.model}"
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
     def analyze_data(self, extracted_data, template_name='professional'):

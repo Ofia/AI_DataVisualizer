@@ -18,10 +18,9 @@ class HuggingFaceProvider(BaseProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        # Using a specific provider (not :auto)
-        # Format: "model-name:provider"
-        # Available providers: together, fireworks, replicate, sambanova, cohere
-        self.model = "meta-llama/Llama-3.2-3B-Instruct"  # No provider suffix - let HF choose
+        # Using Llama 3.1 70B - Much better at following complex instructions and generating JSON
+        # This is a larger, more capable model that produces high-quality visualizations
+        self.model = "meta-llama/Meta-Llama-3.1-70B-Instruct"
 
     def analyze_data(self, extracted_data, template_name='professional'):
         """Analyze data using Hugging Face Router API"""

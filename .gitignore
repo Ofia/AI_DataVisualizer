@@ -11,9 +11,11 @@ ENV/
 dist/
 build/
 
-# Environment
+# Environment and Secrets
 .env
 Antrophic API key.txt
+*.txt.key
+*API*.txt
 
 # Uploads and test data
 uploads/

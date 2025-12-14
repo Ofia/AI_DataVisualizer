@@ -20,7 +20,7 @@ class HuggingFaceProvider(BaseProvider):
         # - "HuggingFaceH4/zephyr-7b-beta" (good alternative)
         # - "mistralai/Mixtral-8x7B-Instruct-v0.1" (powerful but slower)
 
-        self.api_url = f"https://api-inference.huggingface.co/models/{self.model}"
+        self.api_url = f"https://router.huggingface.co/models/{self.model}"
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
     def analyze_data(self, extracted_data, template_name='professional'):

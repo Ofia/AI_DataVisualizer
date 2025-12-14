@@ -18,9 +18,9 @@ class HuggingFaceProvider(BaseProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        # Using Llama 3.1 70B - Much better at following complex instructions and generating JSON
-        # This is a larger, more capable model that produces high-quality visualizations
-        self.model = "meta-llama/Meta-Llama-3.1-70B-Instruct"
+        # Using Qwen 2.5 72B - Excellent at following complex instructions and generating JSON
+        # Confirmed available on HF Router and great for structured output
+        self.model = "Qwen/Qwen2.5-72B-Instruct"
 
     def analyze_data(self, extracted_data, template_name='professional'):
         """Analyze data using Hugging Face Router API"""

@@ -1,80 +1,68 @@
 import os
+from openai import OpenAI
 from .base_provider import BaseProvider
 from visualization.templates import get_template_config
 from config import config
 import json
-import requests
 
 class HuggingFaceProvider(BaseProvider):
     """
-    Provider for Hugging Face Inference API
-    Uses free models like Llama, Mistral, etc.
+    Provider for Hugging Face Router API (OpenAI-compatible)
+    Uses the new router.huggingface.co endpoint with automatic provider selection
     """
 
     def __init__(self):
         self.api_key = os.getenv('HUGGINGFACE_API_KEY', '')
-        # Free model that works with Inference API
-        self.model = "HuggingFaceH4/zephyr-7b-beta"  # Free, reliable model
-        # Alternative models if this one doesn't work:
-        # - "mistralai/Mistral-7B-Instruct-v0.1"
-        # - "meta-llama/Llama-2-7b-chat-hf" (may require approval)
-        # - "google/flan-t5-xxl" (text generation)
 
-        self.api_url = f"https://api-inference.huggingface.co/models/{self.model}"
-        self.headers = {"Authorization": f"Bearer {self.api_key}"}
+        # Initialize OpenAI client with HF Router endpoint
+        self.client = OpenAI(
+            base_url="https://router.huggingface.co/v1",
+            api_key=self.api_key
+        )
+
+        # Use :auto to let Hugging Face automatically select the best provider
+        # You can also specify a provider explicitly: "model-name:provider"
+        # Available providers: together, fireworks, replicate, sambanova, cohere, etc.
+        self.model = "meta-llama/Llama-3.2-3B-Instruct:auto"
 
     def analyze_data(self, extracted_data, template_name='professional'):
-        """Analyze data using Hugging Face model"""
+        """Analyze data using Hugging Face Router API"""
         try:
             # Prepare the data for analysis
             data_summary = self._prepare_data_summary(extracted_data)
 
             # Create the prompt
-            prompt = self._create_analysis_prompt(data_summary, extracted_data, template_name)
+            user_prompt = self._create_analysis_prompt(data_summary, extracted_data, template_name)
 
-            # Call Hugging Face API
-            response = self._call_huggingface_api(prompt)
+            # Call Hugging Face API using OpenAI-compatible format
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a data visualization expert. Analyze data and generate JSON responses with insights and Plotly chart specifications."
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt
+                    }
+                ],
+                max_tokens=2000,
+                temperature=0.7,
+                top_p=0.95
+            )
+
+            # Extract the response text
+            analysis_text = response.choices[0].message.content
 
             # Parse the response
-            analysis = self._parse_analysis(response)
+            analysis = self._parse_analysis(analysis_text)
 
             return analysis
 
         except Exception as e:
             print(f"DEBUG: Hugging Face API Error: {str(e)}")
             raise Exception(f"Hugging Face API error: {str(e)}")
-
-    def _call_huggingface_api(self, prompt):
-        """Call the Hugging Face Inference API"""
-        payload = {
-            "inputs": prompt,
-            "parameters": {
-                "max_new_tokens": 2000,
-                "temperature": 0.7,
-                "top_p": 0.95,
-                "return_full_text": False
-            }
-        }
-
-        # Make request
-        response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=60)
-
-        if response.status_code == 503:
-            # Model is loading, wait and retry
-            import time
-            print("Model is loading, waiting 20 seconds...")
-            time.sleep(20)
-            response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=60)
-
-        if response.status_code != 200:
-            raise Exception(f"API returned status {response.status_code}: {response.text}")
-
-        result = response.json()
-
-        if isinstance(result, list) and len(result) > 0:
-            return result[0].get('generated_text', '')
-
-        return result.get('generated_text', str(result))
 
     def _prepare_data_summary(self, extracted_data):
         """Prepare a summary of the extracted data"""
@@ -93,7 +81,7 @@ class HuggingFaceProvider(BaseProvider):
         colors = template_config.get('colors', [])
         color_instruction = f"Use this color palette: {', '.join(colors)}" if colors else "Use a professional color palette."
 
-        prompt = f"""<s>[INST] You are a data visualization expert. Analyze the following data and generate a JSON response with insights and chart specifications.
+        prompt = f"""Analyze the following data and generate a JSON response with insights and chart specifications.
 
 Data Summary:
 - Type: {data_summary['type']}
@@ -142,7 +130,7 @@ IMPORTANT: Respond with ONLY valid JSON in this exact format:
 }}
 
 {color_instruction}
-Return ONLY the JSON, no other text. [/INST]"""
+Return ONLY the JSON, no other text."""
 
         return prompt
 

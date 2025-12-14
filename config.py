@@ -24,7 +24,7 @@ class Config:
     
     # AI Providers Status
     AI_PROVIDERS = {
-        'anthropic': {'name': 'Anthropic Claude', 'enabled': True},
+        'anthropic': {'name': 'Anthropic Claude', 'enabled': False},  # Disabled - using HF only
         'huggingface': {'name': 'Hugging Face (Free)', 'enabled': True},
         'openai': {'name': 'OpenAI GPT-4', 'enabled': False},
         'gemini': {'name': 'Google Gemini', 'enabled': False},

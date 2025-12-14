@@ -15,10 +15,12 @@ build/
 .env
 Antrophic API key.txt
 
-# Uploads
+# Uploads and test data
 uploads/
 temp/
+test_data/
 *.tmp
+SECURE NOT TO DEPLOY/
 
 # IDE
 .vscode/

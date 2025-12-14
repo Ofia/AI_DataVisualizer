@@ -1,4 +1,5 @@
 from .anthropic_provider import AnthropicProvider
+from .huggingface_provider import HuggingFaceProvider
 from config import config
 
 class ProviderFactory:
@@ -36,6 +37,11 @@ class ProviderFactory:
             provider = AnthropicProvider()
             if not provider.is_available():
                 raise ValueError("Anthropic API key not configured")
+            return provider
+        elif provider_name == 'huggingface':
+            provider = HuggingFaceProvider()
+            if not provider.is_available():
+                raise ValueError("Hugging Face API key not configured")
             return provider
         elif provider_name == 'openai':
             # TODO: Implement OpenAI provider

@@ -138,6 +138,115 @@ function selectTemplate(template) {
     }
 }
 
+// Progress tracking
+let progressInterval = null;
+let holdMessageTimeout1 = null;
+let holdMessageTimeout2 = null;
+let holdMessageTimeout3 = null;
+let progressStages = [
+    { percent: 15, duration: 1000, text: "Processing your data...", stage: "Extracting and validating data structure", stageNum: 1 },
+    { percent: 30, duration: 2000, text: "AI is analyzing patterns...", stage: "Claude is reading your data", stageNum: 2 },
+    { percent: 50, duration: 3000, text: "AI is analyzing patterns...", stage: "Identifying insights and trends", stageNum: 2 },
+    { percent: 70, duration: 3000, text: "AI is analyzing patterns...", stage: "Determining optimal visualizations", stageNum: 2 },
+    { percent: 85, duration: 2000, text: "Generating visualizations...", stage: "Creating interactive charts", stageNum: 3 },
+    { percent: 95, duration: 1000, text: "Finalizing...", stage: "Applying theme and polish", stageNum: 4 }
+];
+
+function updateProgress(percent, text, stage, stageNum) {
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressText = document.getElementById('progressText');
+    const progressStage = document.getElementById('progressStage');
+
+    progressBar.style.width = percent + '%';
+    progressPercent.textContent = percent + '%';
+    progressText.textContent = text;
+    progressStage.textContent = stage;
+
+    // Update stage items
+    for (let i = 1; i <= 4; i++) {
+        const stageItem = document.getElementById('stage' + i);
+        stageItem.classList.remove('active', 'completed');
+
+        if (i < stageNum) {
+            stageItem.classList.add('completed');
+        } else if (i === stageNum) {
+            stageItem.classList.add('active');
+        }
+    }
+}
+
+function updateProgressText(text, makeSmaller = false) {
+    const progressText = document.getElementById('progressText');
+    progressText.textContent = text;
+
+    if (makeSmaller) {
+        progressText.classList.add('smaller');
+    } else {
+        progressText.classList.remove('smaller');
+    }
+}
+
+function startProgressSimulation() {
+    // Reset progress
+    updateProgress(0, "Initializing...", "Starting analysis", 1);
+
+    let currentStage = 0;
+
+    function advanceProgress() {
+        if (currentStage < progressStages.length) {
+            const stage = progressStages[currentStage];
+            updateProgress(stage.percent, stage.text, stage.stage, stage.stageNum);
+
+            // When we hit 95%, cycle through the hold messages in the progress text (above bar) (4 seconds each)
+            if (stage.percent === 95) {
+                holdMessageTimeout1 = setTimeout(() => {
+                    updateProgressText("Hold on friend, I'm not stuck!", true);
+                }, 1000);
+
+                holdMessageTimeout2 = setTimeout(() => {
+                    updateProgressText("We're baking the charts for you, just a few more seconds...", true);
+                }, 5000); // 1 + 4 seconds
+
+                holdMessageTimeout3 = setTimeout(() => {
+                    updateProgressText("Your data is flowing through fiber-optic cables around the entire world — it's almost there!", true);
+                }, 9000); // 5 + 4 seconds
+
+                // After all messages, go back to "Finalizing..." with normal size
+                setTimeout(() => {
+                    updateProgressText("Finalizing...", false);
+                }, 13000); // 9 + 4 seconds
+            }
+
+            currentStage++;
+            progressInterval = setTimeout(advanceProgress, stage.duration);
+        }
+    }
+
+    advanceProgress();
+}
+
+function stopProgressSimulation() {
+    if (progressInterval) {
+        clearTimeout(progressInterval);
+        progressInterval = null;
+    }
+    if (holdMessageTimeout1) {
+        clearTimeout(holdMessageTimeout1);
+        holdMessageTimeout1 = null;
+    }
+    if (holdMessageTimeout2) {
+        clearTimeout(holdMessageTimeout2);
+        holdMessageTimeout2 = null;
+    }
+    if (holdMessageTimeout3) {
+        clearTimeout(holdMessageTimeout3);
+        holdMessageTimeout3 = null;
+    }
+    // Set to 100% when done
+    updateProgress(100, "Complete!", "Analysis finished", 4);
+}
+
 // Analyze data
 async function analyzeData() {
     if (!currentFilepath) {
@@ -158,6 +267,9 @@ async function analyzeData() {
         loadingSection.style.display = 'block';
         loadingSection.scrollIntoView({ behavior: 'smooth' });
 
+        // Start progress simulation
+        startProgressSimulation();
+
         const response = await fetch('/analyze', {
             method: 'POST',
             headers: {
@@ -172,20 +284,30 @@ async function analyzeData() {
 
         const data = await response.json();
 
+        // Stop progress simulation
+        stopProgressSimulation();
+
         if (data.success) {
             currentAnalysis = data.analysis;
-            displayResults(data);
+
+            // Small delay to show 100%
+            setTimeout(() => {
+                displayResults(data);
+            }, 500);
         } else {
             alert(`Error: ${data.error}`);
         }
     } catch (error) {
+        stopProgressSimulation();
         alert(`Error: ${error.message}`);
     } finally {
-        // Hide loading
-        btnText.style.display = 'inline';
-        btnLoader.style.display = 'none';
-        analyzeBtn.disabled = false;
-        loadingSection.style.display = 'none';
+        // Hide loading after a short delay
+        setTimeout(() => {
+            btnText.style.display = 'inline';
+            btnLoader.style.display = 'none';
+            analyzeBtn.disabled = false;
+            loadingSection.style.display = 'none';
+        }, 600);
     }
 }
 

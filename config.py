@@ -16,7 +16,7 @@ class Config:
     # File Upload Settings
     UPLOAD_FOLDER = 'uploads'
     MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
-    ALLOWED_EXTENSIONS = {'pdf', 'xlsx', 'xls', 'png', 'jpg', 'jpeg'}
+    ALLOWED_EXTENSIONS = {'pdf', 'xlsx', 'xls', 'csv', 'png', 'jpg', 'jpeg'}
     
     # Visualization Settings
     AVAILABLE_TEMPLATES = ['professional', 'vibrant', 'minimal', 'dark']
@@ -25,6 +25,7 @@ class Config:
     # AI Providers Status
     AI_PROVIDERS = {
         'anthropic': {'name': 'Anthropic Claude', 'enabled': True},
+        'huggingface': {'name': 'Hugging Face (Free)', 'enabled': True},
         'openai': {'name': 'OpenAI GPT-4', 'enabled': False},
         'gemini': {'name': 'Google Gemini', 'enabled': False},
         'llama': {'name': 'Local Llama', 'enabled': False}

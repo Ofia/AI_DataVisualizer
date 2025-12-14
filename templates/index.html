@@ -80,9 +80,9 @@
                     <div class="upload-icon">📊</div>
                     <h3>Drag & Drop Your File</h3>
                     <p>or click to browse</p>
-                    <p class="file-types">Supported: PDF, Excel (.xlsx, .xls), Screenshots (.png, .jpg)</p>
+                    <p class="file-types">Supported: PDF, Excel (.xlsx, .xls), CSV (.csv), Screenshots (.png, .jpg)</p>
                 </div>
-                <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg" hidden>
+                <input type="file" id="fileInput" accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg" hidden>
             </div>
 
             <div class="upload-status" id="uploadStatus" style="display: none;">
@@ -119,8 +119,34 @@
 
         <!-- Loading Indicator -->
         <div class="loading-section" id="loadingSection" style="display: none;">
-            <div class="loader"></div>
-            <p>AI is analyzing your data...</p>
+            <div class="progress-container">
+                <div class="progress-text" id="progressText">Processing your data...</div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar" style="width: 0%;">
+                        <span id="progressPercent">0%</span>
+                    </div>
+                </div>
+                <div class="progress-stage" id="progressStage">Initializing...</div>
+
+                <div class="progress-stages">
+                    <div class="stage-item" id="stage1">
+                        <span class="stage-icon">📊</span>
+                        <div>Processing Data</div>
+                    </div>
+                    <div class="stage-item" id="stage2">
+                        <span class="stage-icon">🤖</span>
+                        <div>AI Analysis</div>
+                    </div>
+                    <div class="stage-item" id="stage3">
+                        <span class="stage-icon">📈</span>
+                        <div>Creating Charts</div>
+                    </div>
+                    <div class="stage-item" id="stage4">
+                        <span class="stage-icon">✨</span>
+                        <div>Finalizing</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Results Section -->

@@ -1,6 +1,7 @@
 import os
 from .pdf_extractor import PDFExtractor
 from .excel_extractor import ExcelExtractor
+from .csv_extractor import CSVExtractor
 from .image_extractor import ImageExtractor
 
 class ExtractorFactory:
@@ -29,6 +30,8 @@ class ExtractorFactory:
             return PDFExtractor(filepath)
         elif extension in ['.xlsx', '.xls']:
             return ExcelExtractor(filepath)
+        elif extension == '.csv':
+            return CSVExtractor(filepath)
         elif extension in ['.png', '.jpg', '.jpeg']:
             return ImageExtractor(filepath)
         else:

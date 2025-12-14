@@ -1,180 +1,66 @@
-# AI Data Visualizer
+---
+title: AI Data Visualizer
+emoji: 📊
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 5000
+pinned: false
+license: mit
+---
 
-Transform your data into beautiful, AI-generated visualizations using advanced language models.
+# AI Data Visualizer 📊
+
+Transform your data into beautiful, AI-generated visualizations using free open-source models!
 
 ## Features
 
-- 📊 **Multi-Format Support**: Upload PDFs, Excel files, or screenshots
-- 🤖 **AI-Powered Analysis**: Leverages Claude (Anthropic) to intelligently analyze your data
-- 🎨 **4 Beautiful Templates**: Choose from Professional, Vibrant, Minimal, or Dark Mode themes
+- 📊 **Multi-Format Support**: Upload PDFs, Excel files, CSV files, or screenshots
+- 🤖 **Free AI Analysis**: Uses Hugging Face's free inference API (Mistral-7B)
+- 🎨 **4 Beautiful Templates**: Professional, Vibrant, Minimal, or Dark Mode
 - 🔄 **Live Template Switching**: Toggle between visualization styles in real-time
-- 📄 **PDF Export**: Download professional, high-quality reports with data-driven charts
-- 🌐 **Modern Web Interface**: Drag-and-drop file upload with smooth animations
+- 📄 **PDF Export**: Download professional reports with data-driven charts
+- 🌐 **Modern Web Interface**: Drag-and-drop file upload
 
-## Supported AI Providers
+## How to Use
 
-Currently Available:
-- ✅ **Anthropic Claude** (Claude 3.5 Sonnet with vision capabilities)
+1. **Upload your data file**
+   - Supported: PDF, Excel (.xlsx, .xls), CSV (.csv), Images (.png, .jpg)
 
-Coming Soon:
-- ⏳ OpenAI GPT-4 Vision
-- ⏳ Google Gemini Pro
-- ⏳ Local Llama Models
+2. **Choose a visualization style**
+   - Professional, Vibrant, Minimal, or Dark
 
-## Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Setup Instructions
-
-1. **Clone or navigate to the project directory**
-   ```bash
-   cd C:\Users\ofir\Desktop\Projects\VisualizeData
-   ```
-
-2. **Create a virtual environment (recommended)**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure API Keys**
-   - API keys are already configured in `.env` file
-   - To use additional providers later, add their keys to `.env`
-
-## Usage
-
-1. **Start the application**
-   ```bash
-   python app.py
-   ```
-
-2. **Open your browser**
-   Navigate to: `http://localhost:5000`
-
-3. **Upload your data**
-   - Drag and drop a file, or click to browse
-   - Supported formats: PDF, Excel (.xlsx, .xls), Images (.png, .jpg)
-
-4. **Choose a visualization style**
-   - Professional: Clean, business-oriented
-   - Vibrant: Bold colors and modern gradients
-   - Minimal: Simplified, elegant design
-   - Dark: Dark background with high contrast
-
-5. **Generate visualizations**
+3. **Generate visualizations**
    - Click "Generate Visualizations"
-   - AI will analyze your data and create beautiful charts
-   - View insights, charts, and descriptions
+   - AI analyzes your data (takes 30-40 seconds)
+   - View beautiful interactive charts!
 
-6. **Switch templates** (optional)
-   - Click any template to regenerate with a different style
-
-## Project Structure
-
-```
-VisualizeData/
-├── app.py                      # Main Flask application
-├── config.py                   # Configuration and settings
-├── requirements.txt            # Python dependencies
-├── .env                        # Environment variables (API keys)
-├── ai_providers/               # AI integration modules
-│   ├── base_provider.py
-│   ├── anthropic_provider.py
-│   └── provider_factory.py
-├── data_extractors/            # File processing modules
-│   ├── pdf_extractor.py
-│   ├── excel_extractor.py
-│   ├── image_extractor.py
-│   └── extractor_factory.py
-├── visualization/              # Visualization engine
-│   ├── templates.py
-│   ├── chart_generator.py
-│   └── template_manager.py
-├── static/                     # Frontend assets
-│   ├── css/styles.css
-│   └── js/app.js
-└── templates/                  # HTML templates
-    └── index.html
-```
+4. **Switch templates** (optional)
+   - Click any template to regenerate with different styling
 
 ## Technology Stack
 
-- **Backend**: Flask (Python web framework)
-- **AI Integration**: Anthropic Claude API
-- **Data Processing**: pandas, pdfplumber, pytesseract, openpyxl
+- **Backend**: Flask (Python)
+- **AI**: Hugging Face Inference API (Mistral-7B-Instruct)
+- **Data Processing**: pandas, pdfplumber, openpyxl
 - **Visualization**: Plotly (interactive charts)
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **Frontend**: HTML5, CSS3, JavaScript
 
-## Features in Detail
+## Setup for Local Development
 
-### Burger Menu
-- Access LLM API provider selection
-- Shows current provider status
-- Future providers displayed as "Coming Soon"
+1. Clone this space
+2. Install dependencies: `pip install -r requirements.txt`
+3. Get a free Hugging Face API token from https://huggingface.co/settings/tokens
+4. Create `.env` file with: `HUGGINGFACE_API_KEY=your_token_here`
+5. Run: `python app.py`
+6. Open: http://localhost:5000
 
-### Data Extraction
-- **PDF**: Extracts tables and text automatically
-- **Excel**: Reads all sheets and columns
-- **Images**: Uses AI vision to analyze screenshots and tables
+## Notes
 
-### AI Analysis
-- Identifies data patterns and insights
-- Recommends optimal chart types
-- Generates descriptive text for each visualization
-- Adapts to different data structures
-
-### Visualization Templates
-Each template includes:
-- Custom color schemes
-- Font styling
-- Chart aesthetics
-- Background and grid colors
-
-### PDF Export (New)
-- **Data-Driven Generation**: Builds PDFs programmatically for perfect layout.
-- **High-Quality Charts**: Renders Plotly charts as crisp images.
-- **Smart Layout**: Automatically handles page breaks and margins.
-
-### Direct Plotly JSON (New)
-- **Advanced Charts**: Supports complex visualizations (Bubble, Sunburst, etc.).
-- **Creative Freedom**: AI generates full Plotly specifications directly.
-
-## Troubleshooting
-
-### OCR Issues
-If tesseract is not installed, image OCR will be skipped. The AI vision will still work.
-To install tesseract:
-- Download from: https://github.com/UB-Mannheim/tesseract/wiki
-- Add to PATH
-
-### API Errors
-- Verify your Anthropic API key in `.env`
-- Check your internet connection
-- Ensure you have API credits
-
-## Future Enhancements
-
-- [x] PDF export functionality
-- [ ] OpenAI GPT-4 Vision integration
-- [ ] Google Gemini integration
-- [ ] Local Llama model support
-- [ ] More visualization templates
-- [ ] Data editing capabilities
-- [ ] Multi-file comparison
-- [ ] Custom color schemes
+- First analysis may take longer as the model loads (20-30 seconds)
+- Uses free Hugging Face Inference API - no cost!
+- For faster results, you can upgrade to a paid API tier
 
 ## License
 
-This project is for personal use.
-
-## Support
-
-For issues or questions, please create an issue in the repository.
+MIT License - feel free to use and modify!

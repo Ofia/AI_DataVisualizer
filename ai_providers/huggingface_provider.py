@@ -1,5 +1,5 @@
 import os
-from openai import OpenAI
+import requests
 from .base_provider import BaseProvider
 from visualization.templates import get_template_config
 from config import config
@@ -13,16 +13,12 @@ class HuggingFaceProvider(BaseProvider):
 
     def __init__(self):
         self.api_key = os.getenv('HUGGINGFACE_API_KEY', '')
-
-        # Initialize OpenAI client with HF Router endpoint
-        self.client = OpenAI(
-            base_url="https://router.huggingface.co/v1",
-            api_key=self.api_key
-        )
-
+        self.api_url = "https://router.huggingface.co/v1/chat/completions"
+        self.headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
         # Use :auto to let Hugging Face automatically select the best provider
-        # You can also specify a provider explicitly: "model-name:provider"
-        # Available providers: together, fireworks, replicate, sambanova, cohere, etc.
         self.model = "meta-llama/Llama-3.2-3B-Instruct:auto"
 
     def analyze_data(self, extracted_data, template_name='professional'):
@@ -35,9 +31,9 @@ class HuggingFaceProvider(BaseProvider):
             user_prompt = self._create_analysis_prompt(data_summary, extracted_data, template_name)
 
             # Call Hugging Face API using OpenAI-compatible format
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            payload = {
+                "model": self.model,
+                "messages": [
                     {
                         "role": "system",
                         "content": "You are a data visualization expert. Analyze data and generate JSON responses with insights and Plotly chart specifications."
@@ -47,15 +43,29 @@ class HuggingFaceProvider(BaseProvider):
                         "content": user_prompt
                     }
                 ],
-                max_tokens=2000,
-                temperature=0.7,
-                top_p=0.95
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "top_p": 0.95
+            }
+
+            # Make the API request
+            response = requests.post(
+                self.api_url,
+                headers=self.headers,
+                json=payload,
+                timeout=60
             )
 
-            # Extract the response text
-            analysis_text = response.choices[0].message.content
+            # Check for errors
+            if response.status_code != 200:
+                error_detail = response.text
+                raise Exception(f"API returned status {response.status_code}: {error_detail}")
 
-            # Parse the response
+            # Parse response
+            result = response.json()
+            analysis_text = result['choices'][0]['message']['content']
+
+            # Parse the analysis
             analysis = self._parse_analysis(analysis_text)
 
             return analysis

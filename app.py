@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_file, session
 import os
+import sys
+import traceback
 from werkzeug.utils import secure_filename
 from config import config
 from ai_providers.provider_factory import ProviderFactory
@@ -96,6 +98,7 @@ def analyze_data():
         # Get AI provider (with session API key if available)
         api_key = session.get('anthropic_api_key') if provider_name == 'anthropic' else None
         print(f"DEBUG: api_key present = {api_key is not None}")
+        sys.stdout.flush()
         provider = ProviderFactory.get_provider(provider_name, api_key=api_key)
         
         # Analyze data with AI
@@ -115,6 +118,9 @@ def analyze_data():
         })
         
     except Exception as e:
+        print(f"ERROR in /analyze: {str(e)}")
+        traceback.print_exc()
+        sys.stdout.flush()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/regenerate', methods=['POST'])

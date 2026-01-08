@@ -219,7 +219,8 @@ async function analyzeData() {
             body: JSON.stringify({
                 filepath: currentFilepath,
                 provider: currentProvider,
-                template: currentTemplate
+                template: currentTemplate,
+                api_key: currentProvider === 'anthropic' ? localStorage.getItem('anthropic_api_key') : null
             })
         });
 
@@ -579,6 +580,8 @@ async function submitApiKey() {
 
         if (data.success) {
             // Show success message
+            // Store API key in localStorage for persistence across requests
+            localStorage.setItem('anthropic_api_key', apiKey);
             modalStatus.textContent = data.message || 'API key saved successfully!';
             modalStatus.className = 'modal-status success';
             modalStatus.style.display = 'block';

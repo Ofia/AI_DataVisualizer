@@ -95,9 +95,13 @@ def analyze_data():
         extractor = ExtractorFactory.get_extractor(filepath)
         extracted_data = extractor.extract()
 
-        # Get AI provider (with session API key if available)
-        api_key = session.get('anthropic_api_key') if provider_name == 'anthropic' else None
+        # Get AI provider (with API key from request or session)
+        # Prioritize API key from request body (sent from localStorage) over session
+        api_key = None
+        if provider_name == 'anthropic':
+            api_key = data.get('api_key') or session.get('anthropic_api_key')
         print(f"DEBUG: api_key present = {api_key is not None}")
+        print(f"DEBUG: api_key from request = {data.get('api_key') is not None}")
         sys.stdout.flush()
         provider = ProviderFactory.get_provider(provider_name, api_key=api_key)
         

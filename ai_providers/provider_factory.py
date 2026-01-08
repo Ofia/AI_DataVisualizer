@@ -6,35 +6,38 @@ class ProviderFactory:
     """Factory class to get the appropriate AI provider"""
     
     @staticmethod
-    def get_provider(provider_name=None):
+    def get_provider(provider_name=None, api_key=None):
         """
         Get an AI provider instance
-        
+
         Args:
             provider_name: Name of the provider ('anthropic', 'openai', 'gemini', 'llama')
                           If None, uses default from config
-        
+            api_key: Optional API key for BYOK (Bring Your Own Key) feature
+                    If provided, uses this instead of environment variable
+
         Returns:
             Instance of the requested provider
-        
+
         Raises:
             ValueError: If provider is not available or not supported
         """
         if provider_name is None:
             provider_name = config.DEFAULT_AI_PROVIDER
-        
+
         provider_name = provider_name.lower()
-        
+
         # Check if provider is enabled
         if provider_name not in config.AI_PROVIDERS:
             raise ValueError(f"Unknown AI provider: {provider_name}")
-        
+
         if not config.AI_PROVIDERS[provider_name]['enabled']:
             raise ValueError(f"AI provider '{provider_name}' is not currently enabled")
-        
+
         # Return the appropriate provider
         if provider_name == 'anthropic':
-            provider = AnthropicProvider()
+            # Use provided API key (BYOK) or fall back to environment variable
+            provider = AnthropicProvider(api_key=api_key)
             if not provider.is_available():
                 raise ValueError("Anthropic API key not configured")
             return provider

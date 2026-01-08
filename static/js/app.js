@@ -515,8 +515,175 @@ async function exportPDF() {
     }
 }
 
+// =========================================
+// MODEL SELECTOR (BYOK) FUNCTIONS
+// =========================================
+
+// Toggle burger menu dropdown
+function toggleModelMenu() {
+    const dropdown = document.getElementById('modelDropdown');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const modelSelector = document.querySelector('.model-selector');
+    const dropdown = document.getElementById('modelDropdown');
+
+    if (modelSelector && dropdown && !modelSelector.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Select AI model (Qwen or Claude)
+async function selectModel(provider) {
+    try {
+        const response = await fetch('/api/select-provider', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ provider })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update UI to show active provider
+            updateActiveProvider(provider);
+            currentProvider = provider;
+
+            // Close dropdown
+            document.getElementById('modelDropdown').style.display = 'none';
+        } else if (data.needs_api_key) {
+            // Show API key modal
+            openApiKeyModal();
+        } else {
+            alert(`Error: ${data.error || 'Failed to switch provider'}`);
+        }
+    } catch (error) {
+        console.error('Error selecting model:', error);
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Update UI to show which provider is active
+function updateActiveProvider(provider) {
+    // Hide all checkmarks
+    document.getElementById('check-huggingface').style.display = 'none';
+    document.getElementById('check-anthropic').style.display = 'none';
+
+    // Show checkmark for active provider
+    document.getElementById(`check-${provider}`).style.display = 'inline';
+}
+
+// Open API Key Modal
+function openApiKeyModal() {
+    document.getElementById('apiKeyModal').style.display = 'flex';
+    document.getElementById('apiKeyInput').value = '';
+    document.getElementById('modalStatus').style.display = 'none';
+}
+
+// Close API Key Modal
+function closeApiKeyModal() {
+    document.getElementById('apiKeyModal').style.display = 'none';
+}
+
+// Toggle password visibility in API key input
+function toggleApiKeyVisibility() {
+    const input = document.getElementById('apiKeyInput');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// Submit API key
+async function submitApiKey() {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    const modalStatus = document.getElementById('modalStatus');
+    const confirmBtn = document.querySelector('.btn-primary');
+    const btnText = confirmBtn.querySelector('.btn-text');
+    const btnLoader = confirmBtn.querySelector('.btn-loader');
+
+    if (!apiKey) {
+        modalStatus.textContent = 'Please enter an API key';
+        modalStatus.className = 'modal-status error';
+        modalStatus.style.display = 'block';
+        return;
+    }
+
+    try {
+        // Show loading
+        confirmBtn.classList.add('loading');
+        btnText.style.display = 'none';
+        btnLoader.style.display = 'inline';
+        confirmBtn.disabled = true;
+
+        const response = await fetch('/api/set-api-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ api_key: apiKey })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show success message
+            modalStatus.textContent = data.message || 'API key saved successfully!';
+            modalStatus.className = 'modal-status success';
+            modalStatus.style.display = 'block';
+
+            // Update current provider
+            currentProvider = 'anthropic';
+            updateActiveProvider('anthropic');
+
+            // Close modal after short delay
+            setTimeout(() => {
+                closeApiKeyModal();
+            }, 1500);
+        } else {
+            modalStatus.textContent = data.error || 'Failed to save API key';
+            modalStatus.className = 'modal-status error';
+            modalStatus.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error submitting API key:', error);
+        modalStatus.textContent = `Error: ${error.message}`;
+        modalStatus.className = 'modal-status error';
+        modalStatus.style.display = 'block';
+    } finally {
+        // Reset button
+        confirmBtn.classList.remove('loading');
+        btnText.style.display = 'inline';
+        btnLoader.style.display = 'none';
+        confirmBtn.disabled = false;
+    }
+}
+
+// Load current provider on page load
+async function loadCurrentProvider() {
+    try {
+        const response = await fetch('/api/get-current-provider');
+        const data = await response.json();
+
+        if (data.success) {
+            currentProvider = data.provider;
+            updateActiveProvider(data.provider);
+        }
+    } catch (error) {
+        console.error('Error loading current provider:', error);
+    }
+}
+
 // Initialize theme
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Load current AI provider
+    loadCurrentProvider();
 
     // Theme Toggle Logic
     const themeToggle = document.getElementById('themeToggle');

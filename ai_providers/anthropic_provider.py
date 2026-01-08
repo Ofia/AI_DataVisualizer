@@ -6,8 +6,17 @@ import json
 import base64
 
 class AnthropicProvider(BaseProvider):
-    def __init__(self):
-        self.client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    def __init__(self, api_key=None):
+        """
+        Initialize Anthropic provider
+
+        Args:
+            api_key: Optional API key for BYOK (Bring Your Own Key) feature.
+                    If None, uses environment variable from config.
+        """
+        # Use provided API key (BYOK) or fall back to environment variable
+        self.api_key = api_key if api_key else config.ANTHROPIC_API_KEY
+        self.client = anthropic.Anthropic(api_key=self.api_key)
         self.model = "claude-sonnet-4-5"
     
     def analyze_data(self, extracted_data, template_name='professional'):
@@ -200,4 +209,4 @@ Return ONLY the valid JSON. No markdown formatting, no explanations outside the 
     
     def is_available(self):
         """Check if Anthropic is properly configured"""
-        return config.ANTHROPIC_API_KEY is not None and config.ANTHROPIC_API_KEY != ""
+        return self.api_key is not None and self.api_key != ""

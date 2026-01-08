@@ -14,6 +14,28 @@
 <body>
     <!-- Main Content -->
     <div class="container">
+        <!-- AI Model Selector (Burger Menu) - Top Left -->
+        <div class="model-selector">
+            <button class="burger-menu" id="burgerMenu" onclick="toggleModelMenu()">
+                <span class="burger-icon">☰</span>
+            </button>
+            <div class="model-dropdown" id="modelDropdown" style="display: none;">
+                <div class="dropdown-header">
+                    <span>AI Model</span>
+                </div>
+                <div class="dropdown-item" data-provider="huggingface" onclick="selectModel('huggingface')">
+                    <span class="model-name">Qwen 2.5 72B</span>
+                    <span class="model-badge free">Free</span>
+                    <span class="checkmark" id="check-huggingface">✓</span>
+                </div>
+                <div class="dropdown-item" data-provider="anthropic" onclick="selectModel('anthropic')">
+                    <span class="model-name">Claude API</span>
+                    <span class="model-badge byok">BYOK</span>
+                    <span class="checkmark" id="check-anthropic" style="display: none;">✓</span>
+                </div>
+            </div>
+        </div>
+
         <header>
             <div class="header-content">
                 <div class="title-container">
@@ -30,6 +52,40 @@
                 <p class="subtitle">Transform your data into beautiful visualizations</p>
             </div>
         </header>
+
+        <!-- API Key Modal -->
+        <div class="modal" id="apiKeyModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Enter Your Anthropic API Key</h2>
+                    <button class="modal-close" onclick="closeApiKeyModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-description">
+                        To use Claude API, you need to provide your own Anthropic API key.
+                    </p>
+                    <div class="warning-box">
+                        <span class="warning-icon">⚠️</span>
+                        <span>Your API key will only be stored for this session and will be cleared when you close the browser.</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="apiKeyInput">API Key</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+                            <button class="toggle-visibility" onclick="toggleApiKeyVisibility()">👁️</button>
+                        </div>
+                    </div>
+                    <div class="modal-status" id="modalStatus" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeApiKeyModal()">Cancel</button>
+                    <button class="btn-primary" onclick="submitApiKey()">
+                        <span class="btn-text">Confirm</span>
+                        <span class="btn-loader" style="display: none;">⏳</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Upload Section -->
         <div class="upload-section" id="uploadSection">

@@ -14,10 +14,11 @@ app.config['MAX_CONTENT_LENGTH'] = config.MAX_FILE_SIZE
 
 # Session configuration for BYOK (Bring Your Own Key) feature
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
+# Use default Flask sessions (secure signed cookies)
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+# Don't require HTTPS for cookies (HF Spaces handles SSL at proxy level)
+app.config['SESSION_COOKIE_SECURE'] = False
 
 # Create necessary directories
 os.makedirs(config.UPLOAD_FOLDER, exist_ok=True)

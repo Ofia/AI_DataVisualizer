@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Data Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -105,27 +108,8 @@
                     <span class="status-text" id="statusText">File uploaded successfully!</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Template Selector -->
-        <div class="template-section" id="templateSection" style="display: none;">
-            <h2>Choose Visualization Style</h2>
-            <div class="template-grid">
-                {% for template in templates %}
-                <div class="template-card {{ 'active' if template == 'professional' else '' }}"
-                    data-template="{{ template }}" onclick="selectTemplate('{{ template }}')">
-                    <div class="template-preview">
-                        <div class="template-icon">
-                            <div class="template-icon-circle {{ template }}"></div>
-                        </div>
-                    </div>
-                    <div class="template-info">
-                        <h3>{{ template.title() }}</h3>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeData()">
+            <button class="analyze-btn" id="analyzeBtn" onclick="analyzeData()" style="display: none;">
                 <span class="btn-text">Generate Visualizations</span>
                 <span class="btn-loader" style="display: none;">⏳ Analyzing...</span>
             </button>

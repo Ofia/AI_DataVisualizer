@@ -1,8 +1,8 @@
 // Global state
 let currentFile = null;
 let currentFilepath = null;
-let currentTemplate = 'professional';
-let currentProvider = 'huggingface'; // Hard-coded to use free Hugging Face model
+let currentTemplate = 'professional'; // Always use professional template
+let currentProvider = 'huggingface';
 let currentAnalysis = null;
 
 // DOM elements
@@ -10,7 +10,6 @@ const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const uploadStatus = document.getElementById('uploadStatus');
 const statusText = document.getElementById('statusText');
-const templateSection = document.getElementById('templateSection');
 const loadingSection = document.getElementById('loadingSection');
 const resultsSection = document.getElementById('resultsSection');
 
@@ -66,9 +65,8 @@ async function handleFile(file) {
             statusText.textContent = `File uploaded: ${data.filename}`;
             currentFilepath = data.filepath;
 
-            // Show template section
-            templateSection.style.display = 'block';
-            templateSection.scrollIntoView({ behavior: 'smooth' });
+            // Show analyze button
+            document.getElementById('analyzeBtn').style.display = 'block';
         } else {
             statusText.textContent = `Error: ${data.error}`;
             uploadStatus.style.backgroundColor = '#F8D7DA';
@@ -79,25 +77,7 @@ async function handleFile(file) {
     }
 }
 
-// Select template
-function selectTemplate(template) {
-    currentTemplate = template;
-
-    // Update UI
-    document.querySelectorAll('.template-card').forEach(card => {
-        card.classList.remove('active');
-    });
-
-    const selectedCard = document.querySelector(`[data-template="${template}"]`);
-    if (selectedCard) {
-        selectedCard.classList.add('active');
-    }
-
-    // If we already have analysis, regenerate with new template
-    if (currentAnalysis) {
-        regenerateVisualization();
-    }
-}
+// Template selection removed - always uses 'professional' template
 
 // Progress tracking
 let progressInterval = null;
@@ -272,41 +252,7 @@ async function analyzeData() {
     }
 }
 
-// Regenerate visualization with new template
-async function regenerateVisualization() {
-    if (!currentFilepath || !currentAnalysis) {
-        return;
-    }
-
-    try {
-        loadingSection.style.display = 'block';
-
-        const response = await fetch('/regenerate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                filepath: currentFilepath,
-                template: currentTemplate,
-                analysis: currentAnalysis
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            displayResults({
-                analysis: currentAnalysis,
-                visualizations: data.visualizations
-            });
-        }
-    } catch (error) {
-        alert(`Error: ${error.message}`);
-    } finally {
-        loadingSection.style.display = 'none';
-    }
-}
+// Regenerate functionality removed - template switching disabled
 
 // Display results
 function displayResults(data) {

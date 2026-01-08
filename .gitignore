@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Environment and Secrets
+.env
+Antrophic API key.txt
+*.txt.key
+*API*.txt
+
+# Uploads and test data
+uploads/
+temp/
+test_data/
+*.tmp
+SECURE NOT TO DEPLOY/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

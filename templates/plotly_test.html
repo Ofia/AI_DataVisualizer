@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Plotly Test</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+
+<body>
+    <h1>Plotly Chart Test</h1>
+    <div id="test-container" style="border: 2px solid blue; padding: 10px; margin: 20px;">
+        <h2>Test Chart Should Appear Below:</h2>
+        <div id="test-chart"></div>
+    </div>
+
+    <script>
+        // Simple test chart
+        var data = [{
+            x: ['A', 'B', 'C'],
+            y: [10, 20, 30],
+            type: 'bar'
+        }];
+
+        var layout = { title: 'Simple Test Chart' };
+
+        Plotly.newPlot('test-chart', data, layout);
+        console.log('Plot created!');
+    </script>
+
+    <p>If you see a bar chart above, Plotly is working!</p>
+</body>
+
+</html>

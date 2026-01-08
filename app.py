@@ -13,7 +13,19 @@ app.config['UPLOAD_FOLDER'] = config.UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = config.MAX_FILE_SIZE
 
 # Session configuration for BYOK (Bring Your Own Key) feature
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
+# Generate or load a persistent SECRET_KEY
+SECRET_KEY_FILE = '.flask_secret_key'
+if os.environ.get('FLASK_SECRET_KEY'):
+    app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+elif os.path.exists(SECRET_KEY_FILE):
+    with open(SECRET_KEY_FILE, 'r') as f:
+        app.config['SECRET_KEY'] = f.read().strip()
+else:
+    # Generate new key and save it
+    new_key = secrets.token_hex(32)
+    with open(SECRET_KEY_FILE, 'w') as f:
+        f.write(new_key)
+    app.config['SECRET_KEY'] = new_key
 # Use default Flask sessions (secure signed cookies)
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
@@ -72,12 +84,18 @@ def analyze_data():
         provider_name = session.get('selected_provider', data.get('provider', config.DEFAULT_AI_PROVIDER))
         template_name = data.get('template', config.DEFAULT_TEMPLATE)
 
+        # Debug logging
+        print(f"DEBUG: provider_name = {provider_name}")
+        print(f"DEBUG: session keys = {list(session.keys())}")
+        print(f"DEBUG: has anthropic_api_key = {'anthropic_api_key' in session}")
+
         # Extract data
         extractor = ExtractorFactory.get_extractor(filepath)
         extracted_data = extractor.extract()
 
         # Get AI provider (with session API key if available)
         api_key = session.get('anthropic_api_key') if provider_name == 'anthropic' else None
+        print(f"DEBUG: api_key present = {api_key is not None}")
         provider = ProviderFactory.get_provider(provider_name, api_key=api_key)
         
         # Analyze data with AI

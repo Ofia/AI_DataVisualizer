@@ -13,6 +13,7 @@ build/
 
 # Environment and Secrets
 .env
+.flask_secret_key
 Antrophic API key.txt
 *.txt.key
 *API*.txt

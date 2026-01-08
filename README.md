@@ -120,6 +120,8 @@ This app is deployed on Hugging Face Spaces using Docker. See `DEPLOYMENT_GUIDE.
 
 MIT License - feel free to use and modify!
 
+HF Repo: https://huggingface.co/spaces/Ofirmarz/ai-data-visualizer
+
 ---
 
 Built with ❤️ using Hugging Face, Flask, and Plotly

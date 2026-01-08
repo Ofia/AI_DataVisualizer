@@ -1,235 +1,193 @@
 # TODO - AI Data Visualizer
 
-## 📝 Summary of Today's Work (2025-12-14)
+## 🎯 NEXT SESSION: Add BYOK (Bring Your Own Key) Claude Feature
 
-### What We Accomplished:
+### Goal
+Add a burger menu in the top right corner allowing users to choose between:
+- **Qwen 2.5 72B (Free/Default)** - Uses Hugging Face Router API
+- **Claude API (BYOK)** - Users provide their own Anthropic API key
 
-1. **Fixed Deployment Issues**
-   - ✅ Removed burger menu and hard-coded Hugging Face as backend provider
-   - ✅ Resolved "proxies" error by removing OpenAI client library
-   - ✅ Fixed 410 error (old API deprecated)
-   - ✅ Navigated HF Router API transition
-   - ✅ Added billing and got the router working
-
-2. **Upgraded AI Model**
-   - Started with: `meta-llama/Llama-3.2-3B-Instruct` (poor quality)
-   - Ended with: `Qwen/Qwen2.5-72B-Instruct` (much better quality)
-   - Result: App generates 3 charts with real insights now!
-
-3. **Current State**
-   - ✅ Deployed on Hugging Face Spaces
-   - ✅ Using HF Router with billing enabled
-   - ✅ Working end-to-end (upload → analyze → visualize)
-   - ⚠️ Quality is "good but not Claude-level"
+### Key Requirements
+- API key stored in session only (cleared when browser closes)
+- OAuth-style API key registration flow with modal
+- Warning message about session-only storage
+- Visual indicator of active model
 
 ---
 
-## 🔴 CRITICAL REMINDERS
+## 📋 Implementation Plan
 
-### API Configuration
-- **HF Router Endpoint**: `https://router.huggingface.co/v1/chat/completions`
-- **Current Model**: `Qwen/Qwen2.5-72B-Instruct`
-- **Requires**: Billing enabled on HF account
-- **API Key**: Stored in HF Space Settings → Repository secrets
+### 1. Frontend UI Components
 
-### Code Structure
-- **Provider disabled**: Anthropic (set `enabled: False` in config.py)
-- **Only active provider**: Hugging Face
-- **No burger menu**: Removed from UI (templates/index.html)
-- **Hard-coded provider**: Set to `huggingface` in static/js/app.js
+#### Burger Menu
+- Add burger menu icon (☰) in top right corner of the page
+- Create dropdown menu with two options:
+  - "Qwen 2.5 72B (Free)" - default, with checkmark
+  - "Claude API (BYOK)" - option to use own key
+- Add visual indicator showing which model is currently active
 
-### Deployment Process
+#### API Key Modal/Dialog
+- Text input field for API key (with password/show toggle)
+- "Confirm" and "Cancel" buttons
+- Warning message: "Your API key will only be stored for this session and will be cleared when you close the browser"
+- Success message after key is saved
+- Error handling for invalid keys
+
+#### Files to Modify
+- `templates/index.html` - Add burger menu HTML and modal structure
+- `static/style.css` - Style burger menu, dropdown, and modal
+- `static/script.js` - Add menu and API key handling logic
+
+---
+
+### 2. Backend Changes
+
+#### Session Management
+- Add Flask session configuration (using `flask.session`)
+- Create new API endpoint: `/api/set-api-key`
+  - Receives API key via POST
+  - Validates key format/functionality
+  - Stores in session
+  - Returns success/error response
+- Create endpoint: `/api/get-current-provider`
+  - Returns current model selection and whether key is set
+
+#### Provider Logic Updates
+- Modify `ai_providers/provider_factory.py`:
+  - Check session for user's API key first
+  - Fall back to environment variable if no session key
+- Update `ai_providers/anthropic_provider.py`:
+  - Accept API key parameter in constructor
+  - Support both session-based and environment variable keys
+
+#### API Key Validation
+- Ensure the key works before saving to session
+- Basic format validation (starts with 'sk-ant-')
+- Optional: Test API call to verify key is active
+
+#### Files to Modify
+- `app.py` - Add session config and new endpoints
+- `ai_providers/provider_factory.py` - Session-aware provider selection
+- `ai_providers/anthropic_provider.py` - Dynamic API key support
+- `config.py` - Re-enable Anthropic provider if needed
+
+---
+
+### 3. JavaScript Logic
+
+#### Menu Management
+- Handle burger menu toggle (open/close)
+- Handle model selection (switch between Qwen/Claude)
+- Store model preference in localStorage (NOT the API key)
+
+#### API Key Flow
+- Show modal when Claude is selected and no key exists in session
+- Capture API key input
+- Send API key to backend via POST to `/api/set-api-key`
+- Handle success/error responses
+- Update UI to show active provider
+
+#### Form Submission
+- Update form submission to include selected provider
+- Pass session info (backend handles the rest)
+
+#### Files to Modify
+- `static/script.js` (or `static/js/app.js`)
+
+---
+
+### 4. Security & Best Practices
+
+#### Security Measures
+- API key stored in Flask session (server-side, encrypted)
+- Never store key in localStorage or cookies
+- Session expires when browser closes
+- Key transmitted over HTTPS only
+- Don't log API keys in server logs
+
+#### Error Handling
+- Invalid API key format → Clear error message
+- API call fails → Suggest checking key
+- Network errors → Graceful fallback
+- Session expired → Prompt to re-enter key
+
+#### UX Polish
+- Loading states during validation
+- Success feedback when key is saved
+- Clear indicator of which model is active
+- Mobile-responsive design
+
+---
+
+## 🔄 Implementation Steps (Suggested Order)
+
+1. **Backend Foundation**
+   - Set up Flask session configuration
+   - Create `/api/set-api-key` endpoint
+   - Create `/api/get-current-provider` endpoint
+   - Update provider_factory.py to check session
+
+2. **Provider Updates**
+   - Update anthropic_provider.py to accept dynamic API keys
+   - Add key validation logic
+   - Test with sample keys
+
+3. **Frontend UI**
+   - Add burger menu HTML to index.html
+   - Create modal structure for API key input
+   - Style all components in style.css
+
+4. **JavaScript Integration**
+   - Add menu toggle functionality
+   - Add model selection logic
+   - Implement API key submission flow
+   - Handle success/error states
+
+5. **Testing & Polish**
+   - Test full flow: menu → select Claude → enter key → generate viz
+   - Test session persistence
+   - Test error cases
+   - Mobile testing
+   - Update README.md
+
+---
+
+## 📁 Files That Will Be Modified
+
+- `templates/index.html` - Burger menu + modal
+- `static/style.css` - Styling
+- `static/script.js` (or `static/js/app.js`) - Menu logic
+- `app.py` - Session + new endpoints
+- `ai_providers/provider_factory.py` - Session check
+- `ai_providers/anthropic_provider.py` - Dynamic keys
+- `config.py` - Ensure Anthropic is enabled
+- `README.md` - Document new feature
+
+---
+
+## 🚨 Important Reminders
+
+### Current State
+- Using Qwen/Qwen2.5-72B-Instruct via HF Router
+- Anthropic provider exists but may be disabled
+- HF Router requires billing on HF account
+
+### Deployment Note
+When deploying to Hugging Face Spaces:
 ```bash
-# Always use clean orphan branch for HF deployment (avoids PDF binary file errors)
 git checkout --orphan deploy-branch
 git add -A
-git commit -m "Deploy message"
+git commit -m "Add BYOK Claude feature"
 git push huggingface deploy-branch:main --force
 git checkout master && git branch -D deploy-branch
 ```
 
-### Files That Must Stay in .gitignore
-- `.env` (API keys)
-- `venv/` (Python virtual environment)
-- `uploads/`, `temp/`, `test_data/` (user data)
-- `SECURE NOT TO DEPLOY/` (sensitive files)
-- `*.pdf` files (binary files rejected by HF)
-- `Antrophic API key.txt` (API key file)
+### Environment Variables
+- `HUGGINGFACE_API_KEY` - For default Qwen model
+- `ANTHROPIC_API_KEY` - Optional fallback for Claude (not required for BYOK)
 
 ---
 
-## 🎯 NEXT STEP: Add "Bring Your Own Claude Key" Feature
-
-### Goal
-Allow users to optionally use their own Anthropic Claude API key for better quality results.
-
-### Requirements
-- ✅ No user accounts
-- ✅ No saved history
-- ✅ API key stored in memory only (until page refresh)
-- ✅ Users enter key each session
-- ✅ Option A: Key persists in JavaScript memory until page refresh
-
-### Implementation Plan
-
-#### Phase 1: Restore UI Components
-1. **Bring back burger menu**
-   - Add back burger menu HTML to `templates/index.html`
-   - Restore burger menu CSS to `static/css/styles.css`
-   - Restore burger menu JavaScript to `static/js/app.js`
-
-2. **Add provider selection**
-   ```
-   ☰ Menu
-   ├─ 🟢 Hugging Face (Free, uses server key)
-   └─ 🟦 Anthropic Claude (Best quality, BYOK)
-       └─ [Input field for API key]
-           💡 Your key stays in browser memory only
-   ```
-
-#### Phase 2: Frontend Implementation
-1. **JavaScript changes** (`static/js/app.js`)
-   ```javascript
-   // Global variable (memory only, not persisted)
-   let userClaudeKey = null;
-
-   // Function to store key in memory
-   function setClaudeKey(key) {
-       userClaudeKey = key;
-       // Validate format (starts with 'sk-ant-')
-   }
-
-   // Include key in API request
-   function analyzeData() {
-       fetch('/analyze', {
-           method: 'POST',
-           body: JSON.stringify({
-               provider: currentProvider,
-               user_api_key: userClaudeKey,  // Send if Anthropic selected
-               // ... other data
-           })
-       });
-   }
-   ```
-
-2. **UI updates**
-   - Add API key input field (hidden by default)
-   - Show input when "Anthropic Claude" is selected
-   - Add helper text: "Not saved • Secure • Reset on refresh"
-   - Add validation indicator (✓ key format valid)
-
-#### Phase 3: Backend Changes
-1. **Update `app.py`**
-   ```python
-   @app.route('/analyze', methods=['POST'])
-   def analyze():
-       provider_name = request.json.get('provider', 'huggingface')
-       user_api_key = request.json.get('user_api_key')  # Optional
-
-       # Create provider with user's key if provided
-       if provider_name == 'anthropic' and user_api_key:
-           provider = AnthropicProvider(api_key=user_api_key)
-       else:
-           provider = ProviderFactory.get_provider(provider_name)
-
-       # Rest of analysis logic...
-       # user_api_key is discarded after this function
-   ```
-
-2. **Update `anthropic_provider.py`**
-   ```python
-   class AnthropicProvider(BaseProvider):
-       def __init__(self, api_key=None):
-           # Use provided key OR fall back to env variable
-           self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
-           self.client = anthropic.Anthropic(api_key=self.api_key)
-   ```
-
-3. **Re-enable Anthropic in `config.py`**
-   ```python
-   AI_PROVIDERS = {
-       'anthropic': {'name': 'Anthropic Claude', 'enabled': True},
-       'huggingface': {'name': 'Hugging Face', 'enabled': True},
-   }
-   ```
-
-#### Phase 4: Security & UX Polish
-1. **Security measures**
-   - ✅ API key never saved to localStorage/cookies
-   - ✅ Sent over HTTPS only
-   - ✅ Not logged on server
-   - ✅ Input type="password" or with toggle visibility
-   - ✅ Clear from memory on page unload
-
-2. **Error handling**
-   - Invalid API key → Show clear error message
-   - API key format validation (starts with `sk-ant-`)
-   - Network errors → Suggest checking key
-
-3. **UX improvements**
-   - Show "Using your Claude key" indicator when active
-   - Add "Test Key" button (optional)
-   - Clear instructions: "Get your key from console.anthropic.com"
-   - Loading state: "Analyzing with Claude..."
-
-#### Phase 5: Testing Checklist
-- [ ] Burger menu opens/closes correctly
-- [ ] Provider selection switches between HF and Claude
-- [ ] API key input appears only for Claude
-- [ ] Key validation works (format check)
-- [ ] Analysis works with user's Claude key
-- [ ] Analysis falls back to HF if no key provided
-- [ ] Key is cleared on page refresh
-- [ ] Error messages are clear and helpful
-- [ ] Works on mobile devices
-
----
-
-## 📋 Additional Future Ideas (Not Urgent)
-
-### Quality Improvements
-- [ ] Add more chart types (scatter matrix, heatmap, etc.)
-- [ ] Improve prompt engineering for better insights
-- [ ] Add data preprocessing options
-
-### Features
-- [ ] Allow users to edit/customize charts
-- [ ] Save/share chart configurations (without data)
-- [ ] Add chart export formats (SVG, high-res PNG)
-
-### Infrastructure
-- [ ] Add rate limiting to prevent abuse
-- [ ] Add usage analytics (privacy-respecting)
-- [ ] Consider adding more AI providers (Groq, Together AI)
-
----
-
-## 🚨 Known Issues
-
-1. **Model Quality**
-   - Qwen 2.5 72B is good but not Claude-level
-   - Sometimes generates only 1-2 charts instead of 3
-   - JSON parsing can fail with complex data
-
-2. **Cost**
-   - HF Router requires billing (not truly "free")
-   - Need to monitor costs for users
-
-3. **Performance**
-   - First request can be slow (model cold start)
-   - Large datasets may timeout
-
----
-
-## 📚 Documentation to Update
-
-After implementing BYOK feature:
-- [ ] Update README.md with new feature info
-- [ ] Update DEPLOYMENT_GUIDE.md if needed
-- [ ] Add screenshots to show burger menu
-- [ ] Document API key security approach
-
----
-
-**Last Updated**: 2025-12-14
-**Next Session**: Implement "Bring Your Own Claude Key" feature
+**Created**: 2026-01-08
+**Status**: Ready to implement
+**Expected**: Full BYOK Claude feature with session-based key management
